@@ -1,0 +1,224 @@
+!pip install dataprep by
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from collections import Counter
+import seaborn as sns
+import warnings
+from sklearn.model_selection import train_test_split
+from collections import Counter
+import seaborn as sns
+from dataprep.eda import *
+from dataprep.eda import plot
+from dataprep.eda import plot_correlation
+from dataprep.eda import plot_missing
+import plotly.express as px
+import plotly.figure_factory as ff
+import warnings
+warnings.filterwarnings("ignore")
+df=pd.read_csv('../input/glass/glass.csv')
+df.head()
+df.info()
+df.describe()
+print(df.shape)
+df.columns.tolist()
+df
+df.isnull().sum()
+df['Type'].value_counts()
+df['Type'].value_counts().sort_index(ascending=True)
+plt.figure(figsize=(10,10))
+sns.countplot(x='Type', data=df, order=df['Type'].value_counts().index);
+#outlier
+plt.figure(figsize=(10,10))
+sns.boxplot(data=df, orient="h");
+# Pearson Correlation
+plt.figure(figsize=(18,10))
+sns.heatmap(df.corr(method='pearson'), cbar=False, annot=True, fmt='.1f', linewidth=0.2, cmap='coolwarm');
+plot(df)
+plot(df, 'RI')
+plot(df, 'Na')
+plot(df, 'Mg')
+plot(df, 'Al')
+plot(df, 'Si')
+plot(df, 'K')
+plot(df, 'Ca')
+plot(df, 'Ca')
+plot(df, 'Ba')
+plot(df, 'Fe')
+plot(df, 'Type')
+# Missing values
+plot_missing(df)
+create_report(df)
+df['Type'].value_counts()
+
+df['Type'].value_counts() * 100 / len(df)
+
+
+sns.countplot(x='Type', data=df, palette='viridis')
+x = df.loc[:,["RI","Na","Mg","Al","Si","K","Ca","Ba","Fe"]]
+y = df.loc[:,["Type"]]
+print(x,y)
+from imblearn.over_sampling import SMOTE
+
+x = df.drop('Type', axis=1)
+y = df['Type']
+
+# setting up testing and training sets
+X_train, X_test, Y_train, Y_test = train_test_split(x, y, test_size=0.25, random_state=27)
+
+sm = SMOTE(random_state=27)
+#x_train, y_train = sm.fit_sample(x_train, y_train)
+print(X_train.shape)
+print(X_test.shape)
+print(Y_train.shape)
+print(Y_test.shape)
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+# I uesd PCA But not work good result 
+#from sklearn.decomposition import PCA
+#pca = PCA(n_components=2)
+#pca.fit(X_train)
+#X_train = pca.transform(X_train)
+#X_test = pca.transform(X_test)
+def models(X_train,Y_train):
+  
+  #Using Logistic Regression Algorithm to the Training Set
+  from sklearn.linear_model import LogisticRegression
+  log = LogisticRegression(random_state = 0)
+  log.fit(X_train, Y_train)
+  
+  #Using KNeighborsClassifier Method of neighbors class to use Nearest Neighbor algorithm
+  from sklearn.neighbors import KNeighborsClassifier
+  knn = KNeighborsClassifier(n_neighbors = 5, metric = 'minkowski', p = 2)
+  knn.fit(X_train, Y_train)
+    
+  #Using SVC method of svm class to use Support Vector Machine Algorithm
+  from sklearn.svm import SVC
+  svc_lin = SVC(kernel = 'linear', random_state =0)
+  svc_lin.fit(X_train, Y_train)
+
+  #Using SVC method of svm class to use Kernel SVM Algorithm
+  from sklearn.svm import SVC
+  svc_rbf = SVC(kernel = 'rbf', random_state = 0)
+  svc_rbf.fit(X_train, Y_train)
+
+  #Using GaussianNB method of naïve_bayes class to use Naïve Bayes Algorithm
+  from sklearn.naive_bayes import GaussianNB
+  gauss = GaussianNB()
+  gauss.fit(X_train, Y_train)
+
+ 
+
+  #Using RandomForestClassifier method of ensemble class to use Random Forest Classification algorithm
+  from sklearn.ensemble import RandomForestClassifier
+  forest = RandomForestClassifier(n_estimators = 100, criterion = 'entropy', random_state = 0)
+  forest.fit(X_train, Y_train)
+  
+    
+  #Using DecisionTreeClassifier of tree class to use Decision Tree Algorithm
+  from sklearn.tree import DecisionTreeClassifier
+  tree = DecisionTreeClassifier(criterion = 'entropy', random_state = 0)
+  tree.fit(X_train, Y_train)
+    
+    
+    
+    
+ #Using xgboostClassifier of tree class to use Decision Tree Algorithm
+  from xgboost import XGBClassifier 
+  xgboost = XGBClassifier(max_depth=5, learning_rate=0.01, n_estimators=100, gamma=0, 
+                        min_child_weight=1, subsample=0.8, colsample_bytree=0.8, reg_alpha=0.005)
+  xgboost.fit(X_train, Y_train)
+    
+    
+    
+ #Using  SGDClassifierr of tree class to use Decision Tree Algorithm    
+  from sklearn.linear_model import SGDClassifier
+  SGD = SGDClassifier()
+  SGD.fit(X_train, Y_train)
+    
+    
+  #Using  AdaBoostClassifier of tree class to use Decision Tree Algorithm    
+  from sklearn.ensemble import AdaBoostClassifier
+  Ada = AdaBoostClassifier(n_estimators=2000, random_state = 0)
+  Ada.fit(X_train, Y_train)
+   
+
+
+
+  #Using  GradientBoostingClassifier of tree class to use Decision Tree Algorithm    
+  from sklearn.ensemble import GradientBoostingClassifier
+  clf = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1)
+  clf.fit(X_train, Y_train) 
+
+#####
+  
+
+ #Using Quadratic Discriminant Analysis of tree class to use Decision Tree Algorithm    
+  from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis 
+  QDA = QuadraticDiscriminantAnalysis ()
+  QDA.fit(X_train, Y_train)
+    
+
+  #print model accuracy on the training data.
+  print('[0]Logistic Regression Training Accuracy:', log.score(X_train, Y_train)*100)
+  print('[1]K Nearest Neighbor Training Accuracy:', knn.score(X_train, Y_train)*100)
+  print('[2]Support Vector Machine (Linear Classifier) Training Accuracy:', svc_lin.score(X_train, Y_train)*100)
+  print('[3]Support Vector Machine (RBF Classifier) Training Accuracy:', svc_rbf.score(X_train, Y_train)*100)
+  print('[4]Gaussian Naive Bayes Training Accuracy:', gauss.score(X_train, Y_train)*100)
+  print('[5]Decision Tree Classifier Training Accuracy:', tree.score(X_train, Y_train)*100)
+  print('[6]Random Forest Classifier Training Accuracy:', forest.score(X_train, Y_train)*100)
+  print('[7]Xgboost Classifier Training Accuracy:', xgboost.score(X_train, Y_train)*100)
+  print('[8]SGD Classifier Training Accuracy:', SGD.score(X_train, Y_train)*100)
+  print('[9]AdaBoost Classifier Training Accuracy:', Ada.score(X_train, Y_train)*100)
+  print('[10]GradientBoosting Classifier Training Accuracy:', clf.score(X_train, Y_train)*100)
+  print('[11]Quadratic Discriminant AnalysisTraining Accuracy:', QDA.score(X_train, Y_train)*100)
+
+  return log, knn, svc_lin, svc_rbf, gauss,tree,forest,xgboost,SGD,Ada,clf,QDA
+
+model = models(X_train,Y_train)
+#Show the confusion matrix and accuracy for all of the models on the test data
+#Classification accuracy is the ratio of correct predictions to total predictions made.
+from sklearn.metrics import confusion_matrix
+for i in range(len(model)):
+  cm = confusion_matrix(Y_test, model[i].predict(X_test))
+  TN = cm[0][0]
+  TP = cm[1][1]
+  FN = cm[1][0]
+  FP = cm[0][1]
+  print(cm)
+  print('Model[{}] Testing Accuracy = "{}!"'.format(i,  (TP + TN) / (TP + TN + FN + FP)))
+  print()# Print a new line
+
+#Show other ways to get the classification accuracy & other metrics 
+
+from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
+
+for i in range(len(model)):
+  print('Model ',i)
+  #Check precision, recall, f1-score
+  print( classification_report(Y_test, model[i].predict(X_test)) )
+  #Another way to get the models accuracy on the test data
+  print( accuracy_score(Y_test, model[i].predict(X_test)))
+  print()#Print a new line
+  acc_1 = 0.703703*100 
+acc_2 = 0.685185*100
+acc_3 = 0.666666*100
+acc_4 = 0.759259*100
+acc_5 = 0.537037*100
+acc_6 = 0.648148*100
+acc_7 = 0.796296*100
+acc_8 = 0.814814*100
+acc_9 = 0.592592*100
+acc_10 = 0.61111*100
+acc_11 = 0.81481*100
+acc_12 = 0.64814*100
+results = pd.DataFrame([["Logistic Regression",acc_1],["Nearest Neighbor",acc_2],["Support Vector Machine (Linear Classifier)",acc_3],
+                       ["Support Vector Machine (RBF Classifier)",acc_4],["Gaussian Naive Bayes",acc_5],["Decision Tree Classifier",acc_6],
+                       ["Random Forest Classifier",acc_7],["Xgboost Classifier",acc_8],["SGD Classifier ",acc_9],["AdaBoost Classifier",acc_10],
+                        ["GradientBoosting Classifier",acc_11],["Quadratic Discriminant Analysis",acc_12],
+                       ],columns = ["Models","Accuracy Score"]).sort_values(by='Accuracy Score',ascending=False)
+results.style.background_gradient(cmap='Blues')
